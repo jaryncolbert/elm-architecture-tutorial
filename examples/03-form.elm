@@ -20,14 +20,13 @@ type alias Model =
   { name : String
   , password : String
   , passwordAgain : String
-  , color: String
-  , message: String
+  , validationResult : { color: String, message: String }
   }
 
 
 init : Model
 init =
-  Model "" "" "" "" ""
+  Model "" "" "" { color = "", message = "" }
 
 
 
@@ -54,7 +53,7 @@ update msg model =
       { model | passwordAgain = password }
 
     Submit result ->
-      { model | color = result.color, message = result.message }
+      { model | validationResult = result }
 
 
 
@@ -91,7 +90,7 @@ viewInput t p v toMsg =
 
 viewValidation : Model -> Html msg
 viewValidation model =
-  div [ style "color" model.color ] [ text model.message ]
+  div [ style "color" model.validationResult.color ] [ text model.validationResult.message ]
 
 
 stringSatisfies : (Char -> Bool) -> String -> Bool
