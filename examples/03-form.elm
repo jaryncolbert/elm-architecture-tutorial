@@ -1,7 +1,7 @@
 import Browser
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Html.Events exposing (onInput)
+import Html.Events exposing (onInput, onClick)
 
 
 
@@ -20,12 +20,14 @@ type alias Model =
   { name : String
   , password : String
   , passwordAgain : String
+  , color: String
+  , message: String
   }
 
 
 init : Model
 init =
-  Model "" "" ""
+  Model "" "" "" "" ""
 
 
 
@@ -36,6 +38,8 @@ type Msg
   = Name String
   | Password String
   | PasswordAgain String
+  | Submit { color: String, message: String }
+
 
 update : Msg -> Model -> Model
 update msg model =
@@ -49,6 +53,21 @@ update msg model =
     PasswordAgain password ->
       { model | passwordAgain = password }
 
+    Submit result ->
+      { model | color = result.color, message = result.message }
+
+
+
+validateInput : Model -> Msg
+validateInput model =
+  if model.password == model.passwordAgain && has8Digits model.password && hasUpperLowerNumeric model.password then
+    Submit { color = "green", message = "OK" }
+  else if not (has8Digits model.password) then
+    Submit { color = "red", message = "Passwords must be at least 8 characters!" }
+  else if not (hasUpperLowerNumeric model.password) then
+    Submit { color = "red", message = "Passwords must contain at least one uppercase, lowercase, and numeric character!" }
+  else
+    Submit { color = "red", message = "Passwords do not match!" }
 
 
 -- VIEW
@@ -60,6 +79,8 @@ view model =
     [ viewInput "text" "Name" model.name Name
     , viewInput "password" "Password" model.password Password
     , viewInput "password" "Re-enter Password" model.passwordAgain PasswordAgain
+    , button [ onClick (validateInput model) ] [ text "Submit" ]
+    , viewValidation model
     ]
 
 
@@ -70,25 +91,21 @@ viewInput t p v toMsg =
 
 viewValidation : Model -> Html msg
 viewValidation model =
-  if model.password == model.passwordAgain && has8Digits model.password then
-    div [ style "color" "green" ] [ text "OK" ]
-  else if not (has8Digits model.password) then
-    div [ style "color" "red" ] [ text "Passwords must be at least 8 characters!" ]
-  else if not (hasUpperLowerNumeric model.password) then
-    div [ style "color" "red" ] [ text "Passwords must contain at least one uppercase, lowercase, and numeric character!" ]
-  else
-    div [ style "color" "red" ] [ text "Passwords do not match!" ]
+  div [ style "color" model.color ] [ text model.message ]
+
 
 stringSatisfies : (Char -> Bool) -> String -> Bool
 stringSatisfies fn input =
   List.any fn (String.toList input)
 
+
 hasUpperLowerNumeric : String -> Bool
 hasUpperLowerNumeric input =
-    stringSatisfies Char.isUpper input &&
-    stringSatisfies Char.isLower input &&
-    stringSatisfies Char.isDigit input
+  stringSatisfies Char.isUpper input &&
+  stringSatisfies Char.isLower input &&
+  stringSatisfies Char.isDigit input
+
 
 has8Digits : String -> Bool
 has8Digits input =
-    String.length input >= 8
+  String.length input >= 8
