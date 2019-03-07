@@ -37,7 +37,6 @@ type Msg
   | Password String
   | PasswordAgain String
 
-
 update : Msg -> Model -> Model
 update msg model =
   case msg of
@@ -61,7 +60,6 @@ view model =
     [ viewInput "text" "Name" model.name Name
     , viewInput "password" "Password" model.password Password
     , viewInput "password" "Re-enter Password" model.passwordAgain PasswordAgain
-    , viewValidation model
     ]
 
 
@@ -72,7 +70,25 @@ viewInput t p v toMsg =
 
 viewValidation : Model -> Html msg
 viewValidation model =
-  if model.password == model.passwordAgain then
+  if model.password == model.passwordAgain && has8Digits model.password then
     div [ style "color" "green" ] [ text "OK" ]
+  else if not (has8Digits model.password) then
+    div [ style "color" "red" ] [ text "Passwords must be at least 8 characters!" ]
+  else if not (hasUpperLowerNumeric model.password) then
+    div [ style "color" "red" ] [ text "Passwords must contain at least one uppercase, lowercase, and numeric character!" ]
   else
     div [ style "color" "red" ] [ text "Passwords do not match!" ]
+
+stringSatisfies : (Char -> Bool) -> String -> Bool
+stringSatisfies fn input =
+  List.any fn (String.toList input)
+
+hasUpperLowerNumeric : String -> Bool
+hasUpperLowerNumeric input =
+    stringSatisfies Char.isUpper input &&
+    stringSatisfies Char.isLower input &&
+    stringSatisfies Char.isDigit input
+
+has8Digits : String -> Bool
+has8Digits input =
+    String.length input >= 8
