@@ -15,12 +15,16 @@ main =
 
 -- MODEL
 
+type alias ValidationResult =
+    { color: String
+    , message: String
+    }
 
 type alias Model =
   { name : String
   , password : String
   , passwordAgain : String
-  , validationResult : { color: String, message: String }
+  , validationResult : ValidationResult
   }
 
 
@@ -56,7 +60,7 @@ update msg model =
       { model | validationResult = result }
 
 
-clearValidationMsg: { color: String, message: String}
+clearValidationMsg: ValidationResult
 clearValidationMsg = { color = "", message = "" }
 
 
@@ -82,7 +86,7 @@ view model =
     , viewInput "password" "Password" model.password Password
     , viewInput "password" "Re-enter Password" model.passwordAgain PasswordAgain
     , button [ onClick (validateInput model) ] [ text "Submit" ]
-    , viewValidation model
+    , viewValidation model.validationResult
     ]
 
 
@@ -91,9 +95,9 @@ viewInput t p v toMsg =
   input [ type_ t, placeholder p, value v, onInput toMsg ] []
 
 
-viewValidation : Model -> Html msg
-viewValidation model =
-  div [ style "color" model.validationResult.color ] [ text model.validationResult.message ]
+viewValidation : ValidationResult -> Html msg
+viewValidation result =
+  div [ style "color" result.color ] [ text result.message ]
 
 
 stringSatisfies : (Char -> Bool) -> String -> Bool
