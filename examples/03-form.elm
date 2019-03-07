@@ -47,14 +47,17 @@ update msg model =
       { model | name = name }
 
     Password password ->
-      { model | password = password }
+      { model | password = password, validationResult = clearValidationMsg }
 
     PasswordAgain password ->
-      { model | passwordAgain = password }
+      { model | passwordAgain = password, validationResult = clearValidationMsg }
 
     Submit result ->
       { model | validationResult = result }
 
+
+clearValidationMsg: { color: String, message: String}
+clearValidationMsg = { color = "", message = "" }
 
 
 validateInput : Model -> Msg
